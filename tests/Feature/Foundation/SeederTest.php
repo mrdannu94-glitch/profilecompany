@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Foundation;
 
+use App\Enums\PpdbPeriodStatus;
 use App\Models\Permission;
+use App\Models\PpdbPeriod;
 use App\Models\Program;
 use App\Models\Role;
 use App\Models\SchoolUnit;
@@ -85,10 +87,10 @@ class SeederTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $period = \App\Models\PpdbPeriod::query()->where('code', 'PPDB-PLACEHOLDER')->first();
+        $period = PpdbPeriod::query()->where('code', 'PPDB-PLACEHOLDER')->first();
 
         $this->assertNotNull($period);
-        $this->assertSame(\App\Enums\PpdbPeriodStatus::Draft, $period->status);
+        $this->assertSame(PpdbPeriodStatus::Draft, $period->status);
         $this->assertNull($period->registration_fee);
         $this->assertSame(3, $period->schoolUnits()->count());
     }

@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\ContentStatus;
+use Database\Factories\ContentRevisionFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -9,6 +13,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ContentRevision extends Model
 {
+    /** @use HasFactory<ContentRevisionFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'content_item_id',
         'author_id',
@@ -30,10 +37,28 @@ class ContentRevision extends Model
     {
         return [
             'revision_number' => 'integer',
+            'workflow_status' => ContentStatus::class,
             'submitted_at' => 'datetime',
             'reviewed_at' => 'datetime',
             'published_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Revisi yang sudah terbit.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('workflow_status', ContentStatus::Published);
+    }
+
+    /**
+     * Revisi ini masih dapat diubah penulisnya.
+     */
+    public function isEditable(): bool
+    {
+        return $this->workflow_status instanceof ContentStatus
+            && $this->workflow_status->isEditable();
     }
 
     public function contentItem(): BelongsTo

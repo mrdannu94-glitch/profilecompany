@@ -29,25 +29,39 @@
                 </div>
 
                 <div>
+                    <p class="text-sm font-semibold text-ink-900">Profil</p>
+                    <ul class="mt-3 space-y-2 text-sm text-ink-600">
+                        <li><a class="hover:text-primary-700" href="{{ route('profil') }}">Profil Sekolah</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('visi-misi') }}">Visi & Misi</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('sambutan') }}">Sambutan Kepala Sekolah</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('guru-staff') }}">Guru & Staff</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('program') }}">Jurusan & Program</a></li>
+                    </ul>
+                </div>
+
+                <div>
                     <p class="text-sm font-semibold text-ink-900">Informasi</p>
                     <ul class="mt-3 space-y-2 text-sm text-ink-600">
-                        <li><a class="hover:text-primary-700" href="{{ route('home') }}">Beranda</a></li>
-                        <li><a class="hover:text-primary-700" href="{{ route('ppdb.info') }}">Informasi PPDB</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('berita') }}">Berita</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('pengumuman') }}">Pengumuman</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('agenda') }}">Agenda & Kegiatan</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('prestasi') }}">Prestasi</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('fasilitas') }}">Fasilitas</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('ekstrakurikuler') }}">Ekstrakurikuler</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('galeri') }}">Galeri & Video</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('faq') }}">FAQ</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <p class="text-sm font-semibold text-ink-900">Portal Internal</p>
+                    <p class="text-sm font-semibold text-ink-900">Layanan</p>
                     <ul class="mt-3 space-y-2 text-sm text-ink-600">
-                        <li><a class="hover:text-primary-700" href="{{ route('login') }}">Masuk Portal Internal</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('ppdb.info') }}">Informasi PPDB</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('ppdb.register') }}">Daftar PPDB</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('ppdb.status') }}">Cek Status Pendaftaran</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('kontak') }}">Kontak</a></li>
+                        <li><a class="hover:text-primary-700" href="{{ route('login') }}">Portal Internal</a></li>
                     </ul>
-                </div>
-
-                <div>
-                    <p class="text-sm font-semibold text-ink-900">Kontak</p>
-                    <p class="mt-3 text-sm text-ink-600">
-                        Data kontak resmi belum dipublikasikan dan akan diisi setelah konfirmasi sekolah.
-                    </p>
                 </div>
             </div>
 

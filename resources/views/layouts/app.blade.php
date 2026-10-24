@@ -89,7 +89,14 @@
                         </li>
 
                         <li>
-                            <span class="block rounded-control px-3 py-2 text-sm text-ink-400">Konten CMS (segera)</span>
+                            @can('viewAny', App\Models\ContentItem::class)
+                                <a
+                                    class="block rounded-control px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.cms.*') ? 'bg-primary-50 text-primary-800' : 'text-ink-700 hover:bg-ink-100' }}"
+                                    href="{{ route('admin.cms.index') }}"
+                                >Konten CMS</a>
+                            @else
+                                <span class="block rounded-control px-3 py-2 text-sm text-ink-400">Konten CMS</span>
+                            @endcan
                         </li>
 
                         <li>

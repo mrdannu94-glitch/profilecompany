@@ -7,12 +7,17 @@
         <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
             <p class="text-sm font-semibold tracking-wide text-primary-200 uppercase">Penerimaan Peserta Didik Baru</p>
             <h1 class="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-                {{ config('dmr.school_name') }}
+                {{ $page?->title ?: config('dmr.school_name') }}
             </h1>
             <p class="mt-4 max-w-2xl text-base text-primary-100">
-                Informasi resmi jenjang SMP, SMA, dan SMK dalam satu yayasan. Halaman ini masih menggunakan data
-                placeholder dan akan dilengkapi setelah sekolah mengonfirmasi identitas, program, dan kontak resmi.
+                {{ $page?->excerpt ?: 'Informasi resmi jenjang SMP, SMA, dan SMK dalam satu yayasan. Halaman ini masih menggunakan data placeholder dan akan dilengkapi setelah sekolah mengonfirmasi identitas, program, dan kontak resmi.' }}
             </p>
+
+            @if (filled($page?->body))
+                <div class="mt-4 max-w-2xl text-sm leading-relaxed text-primary-100">
+                    {!! nl2br(e($page->body)) !!}
+                </div>
+            @endif
 
             <div class="mt-8 flex flex-wrap gap-3">
                 <a class="btn-primary" href="{{ route('ppdb.info') }}">Informasi PPDB</a>
@@ -46,6 +51,43 @@
                 @endforeach
             </div>
         @endif
+    </section>
+
+    <section class="border-t border-ink-200 bg-ink-50">
+        <div class="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+            <div class="grid gap-8 lg:grid-cols-3">
+                @foreach ([
+                    ['title' => 'Berita Terbaru', 'entries' => $news, 'route' => 'berita', 'show' => 'berita.show'],
+                    ['title' => 'Pengumuman', 'entries' => $announcements, 'route' => 'pengumuman', 'show' => 'pengumuman.show'],
+                    ['title' => 'Agenda', 'entries' => $agenda, 'route' => 'agenda', 'show' => 'agenda.show'],
+                ] as $section)
+                    <div>
+                        <div class="flex items-baseline justify-between gap-3">
+                            <h2 class="text-xl font-semibold text-ink-900">{{ $section['title'] }}</h2>
+                            <a class="text-sm font-semibold text-primary-700 hover:text-primary-800" href="{{ route($section['route']) }}">Semua</a>
+                        </div>
+
+                        @if ($section['entries']->isEmpty())
+                            <p class="mt-4 text-sm text-ink-500">Belum ada konten yang diterbitkan.</p>
+                        @else
+                            <ul class="mt-4 space-y-3">
+                                @foreach ($section['entries'] as $entry)
+                                    <li class="card p-4">
+                                        <p class="text-xs text-ink-500">{{ $entry->published_at?->format('j F Y') }}</p>
+                                        <a class="mt-1 block text-sm font-semibold text-ink-900 hover:text-primary-700" href="{{ route($section['show'], $entry->slug) }}">
+                                            {{ $entry->title }}
+                                        </a>
+                                        @if (filled($entry->excerpt))
+                                            <p class="mt-1 text-sm text-ink-600">{{ \Illuminate\Support\Str::limit($entry->excerpt, 100) }}</p>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
     </section>
 
     <section class="border-t border-ink-200 bg-ink-50">

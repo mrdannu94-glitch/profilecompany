@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\PpdbDocumentController;
 use App\Http\Controllers\Admin\PpdbPaymentController;
 use App\Http\Controllers\Admin\PpdbPeriodController;
@@ -9,8 +10,9 @@ use App\Http\Controllers\Admin\PpdbSelectionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Public\ContentController as PublicContentController;
 use App\Http\Controllers\Public\HomeController;
-use App\Http\Controllers\Public\PlaceholderController;
+use App\Http\Controllers\Public\PageController;
 use App\Http\Controllers\Public\PpdbInfoController;
 use App\Http\Controllers\Public\RegistrationController;
 use App\Http\Controllers\Public\RegistrationDocumentController;
@@ -22,40 +24,39 @@ use Illuminate\Support\Facades\Route;
 | Website Publik
 |--------------------------------------------------------------------------
 |
-| Halaman publik belum dibangun bertahap sesuai rencana implementasi. Route
-| di bawah ini tetap dapat diakses agar navigasi tidak rusak, dan diganti
-| satu per satu pada fase berikutnya.
+| Seluruh halaman publik hanya menampilkan konten yang sudah disetujui dan
+| diterbitkan melalui CMS. Bila belum ada konten terbit, halaman tetap
+| dapat dibuka dengan keterangan bahwa konten belum tersedia.
 |
 */
 
 Route::get('/', HomeController::class)->name('home');
 
-Route::get('/profil', [PlaceholderController::class, 'show'])
-    ->defaults('title', 'Profil Sekolah')
-    ->defaults('phase', 'Fase 3')
-    ->name('profil');
+Route::get('/profil', [PageController::class, 'profil'])->name('profil');
+Route::get('/visi-misi', [PageController::class, 'visiMisi'])->name('visi-misi');
+Route::get('/sambutan', [PageController::class, 'sambutan'])->name('sambutan');
+Route::get('/guru-staff', [PageController::class, 'guruStaff'])->name('guru-staff');
+Route::get('/program', [PageController::class, 'program'])->name('program');
+Route::get('/fasilitas', [PageController::class, 'fasilitas'])->name('fasilitas');
+Route::get('/ekstrakurikuler', [PageController::class, 'ekstrakurikuler'])->name('ekstrakurikuler');
+Route::get('/prestasi', [PageController::class, 'prestasi'])->name('prestasi');
 
-Route::get('/visi-misi', [PlaceholderController::class, 'show'])
-    ->defaults('title', 'Visi & Misi')
-    ->defaults('phase', 'Fase 3')
-    ->name('visi-misi');
+Route::get('/berita', [PublicContentController::class, 'news'])->name('berita');
+Route::get('/berita/{slug}', [PublicContentController::class, 'newsShow'])->name('berita.show');
 
-Route::get('/program', [PlaceholderController::class, 'show'])
-    ->defaults('title', 'Jurusan & Program')
-    ->defaults('phase', 'Fase 3')
-    ->name('program');
+Route::get('/pengumuman', [PublicContentController::class, 'announcements'])->name('pengumuman');
+Route::get('/pengumuman/{slug}', [PublicContentController::class, 'announcementShow'])->name('pengumuman.show');
 
-Route::get('/berita', [PlaceholderController::class, 'show'])
-    ->defaults('title', 'Berita & Pengumuman')
-    ->defaults('phase', 'Fase 3')
-    ->name('berita');
+Route::get('/agenda', [PublicContentController::class, 'agenda'])->name('agenda');
+Route::get('/agenda/{slug}', [PublicContentController::class, 'agendaShow'])->name('agenda.show');
+
+Route::get('/galeri', [PublicContentController::class, 'gallery'])->name('galeri');
+Route::get('/galeri/{slug}', [PublicContentController::class, 'galleryShow'])->name('galeri.show');
 
 Route::get('/ppdb', [PpdbInfoController::class, 'show'])->name('ppdb.info');
 
-Route::get('/kontak', [PlaceholderController::class, 'show'])
-    ->defaults('title', 'Kontak')
-    ->defaults('phase', 'Fase 3')
-    ->name('kontak');
+Route::get('/kontak', [PageController::class, 'kontak'])->name('kontak');
+Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 
 /*
 |--------------------------------------------------------------------------
@@ -210,4 +211,28 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/portal/ppdb/pendaftaran/{registration}/kode-akses', [PpdbRegistrationController::class, 'recoverAccessCode'])
         ->middleware('permission:reset_access_code')
         ->name('admin.ppdb.registrations.access-code');
+});
+
+/*
+|--------------------------------------------------------------------------
+| CMS Konten
+|--------------------------------------------------------------------------
+|
+| Hak akses diperiksa melalui ContentItemPolicy. Penulis hanya dapat
+| mengubah drafnya sendiri, sedangkan review dan publikasi memerlukan
+| permission terpisah agar alur draft -> review -> publish tidak dilewati.
+|
+*/
+
+Route::middleware('auth')->prefix('portal/cms')->name('admin.cms.')->group(function () {
+    Route::get('/', [ContentController::class, 'index'])->name('index');
+    Route::get('/buat', [ContentController::class, 'create'])->name('create');
+    Route::post('/', [ContentController::class, 'store'])->name('store');
+    Route::get('/{item}/ubah', [ContentController::class, 'edit'])->name('edit');
+    Route::put('/{item}', [ContentController::class, 'update'])->name('update');
+    Route::post('/{item}/ajukan', [ContentController::class, 'submit'])->name('submit');
+    Route::get('/{item}/review', [ContentController::class, 'review'])->name('review');
+    Route::post('/{item}/review', [ContentController::class, 'decide'])->name('decide');
+    Route::post('/{item}/terbitkan', [ContentController::class, 'publish'])->name('publish');
+    Route::post('/{item}/arsipkan', [ContentController::class, 'archive'])->name('archive');
 });

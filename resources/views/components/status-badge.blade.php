@@ -9,6 +9,8 @@
     $tones = [
         'draft' => 'bg-ink-100 text-ink-700',
         'submitted' => 'bg-info-50 text-info-700',
+        'published' => 'bg-success-50 text-success-700',
+        'archived' => 'bg-ink-100 text-ink-600',
         'scheduled' => 'bg-info-50 text-info-700',
         'open' => 'bg-success-50 text-success-700',
         'closed' => 'bg-warning-50 text-warning-700',

@@ -3,11 +3,9 @@
 namespace App\Services\Ppdb;
 
 use App\Enums\DocumentStatus;
-use App\Enums\RegistrationStatus;
 use App\Models\RegistrationDocument;
 use App\Models\User;
 use App\Services\AuditLogger;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Service layer pemeriksaan dokumen pendaftaran.
@@ -92,12 +90,7 @@ class DocumentReviewService
 
         $registration = $document->registration;
 
-        if ($registration !== null && ! in_array($registration->status, [
-            RegistrationStatus::Completed,
-            RegistrationStatus::Expired,
-        ], true)) {
-            $registration->forceFill(['status' => RegistrationStatus::DocumentsRejected])->save();
-        }
+        $this->syncRegistrationStatus($document);
 
         $this->audit->log(
             action: 'ppdb.document.needs_revision',
@@ -128,6 +121,8 @@ class DocumentReviewService
             'review_note' => $note,
         ])->save();
 
+        $this->syncRegistrationStatus($document);
+
         $this->audit->log(
             action: 'ppdb.document.rejected',
             entityType: RegistrationDocument::class,
@@ -148,8 +143,8 @@ class DocumentReviewService
     /**
      * Perbarui status pendaftaran setelah pemeriksaan dokumen.
      *
-     * Pendaftaran naik ke `documents_approved` bila seluruh persyaratan
-     * wajib sudah memiliki versi yang disetujui.
+     * Perhitungan dipusatkan pada DocumentService agar unggahan ulang dan
+     * keputusan petugas memakai aturan yang sama.
      */
     protected function syncRegistrationStatus(RegistrationDocument $document): void
     {
@@ -159,27 +154,14 @@ class DocumentReviewService
             return;
         }
 
-        if (in_array($registration->status, [
-            RegistrationStatus::Completed,
-            RegistrationStatus::Expired,
-        ], true)) {
-            return;
-        }
-
-        $missing = $this->documents->missingRequirements($registration);
-
-        if ($missing->isEmpty()) {
-            $registration->forceFill(['status' => RegistrationStatus::DocumentsApproved])->save();
-        } elseif ($registration->status === RegistrationStatus::DocumentsApproved) {
-            $registration->forceFill(['status' => RegistrationStatus::DocumentsPending])->save();
-        }
+        $this->documents->syncRegistrationStatus($registration);
     }
 
     /**
-     * Hitung ulang status pendaftaran dalam satu transaksi.
+     * Hitung ulang status pendaftaran setelah perubahan dokumen.
      */
     public function refreshRegistrationStatus(RegistrationDocument $document): void
     {
-        DB::transaction(fn () => $this->syncRegistrationStatus($document));
+        $this->syncRegistrationStatus($document);
     }
 }

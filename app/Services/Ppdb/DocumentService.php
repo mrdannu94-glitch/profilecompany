@@ -3,6 +3,7 @@
 namespace App\Services\Ppdb;
 
 use App\Enums\DocumentStatus;
+use App\Enums\RegistrationStatus;
 use App\Enums\StorageVisibility;
 use App\Exceptions\Ppdb\DocumentUploadException;
 use App\Models\Media;
@@ -36,6 +37,7 @@ class DocumentService
      */
     public function store(Registration $registration, PpdbRequirement $requirement, UploadedFile $file): RegistrationDocument
     {
+        $this->assertRegistrationOpen($registration);
         $this->assertRequirementApplies($registration, $requirement);
         $this->assertFileAccepted($requirement, $file);
 
@@ -88,7 +90,58 @@ class DocumentService
             ],
         );
 
+        $this->syncRegistrationStatus($registration);
+
         return $document;
+    }
+
+    /**
+     * Pendaftaran yang sudah selesai atau kedaluwarsa tidak menerima
+     * unggahan baru.
+     *
+     * @throws DocumentUploadException
+     */
+    protected function assertRegistrationOpen(Registration $registration): void
+    {
+        if (in_array($registration->status, [
+            RegistrationStatus::Completed,
+            RegistrationStatus::Expired,
+        ], true)) {
+            throw DocumentUploadException::registrationClosed();
+        }
+    }
+
+    /**
+     * Selaraskan status pendaftaran dengan kondisi dokumen terbaru.
+     *
+     * Status dokumen dan pembayaran tetap terpisah; nilai ini hanya
+     * merangkum tahap dokumen pada pendaftaran.
+     */
+    public function syncRegistrationStatus(Registration $registration): void
+    {
+        if (in_array($registration->status, [
+            RegistrationStatus::Completed,
+            RegistrationStatus::Expired,
+        ], true)) {
+            return;
+        }
+
+        $hasReturnedDocument = $this->latestDocuments($registration)
+            ->contains(fn (RegistrationDocument $document): bool => in_array(
+                $document->status,
+                [DocumentStatus::NeedsRevision, DocumentStatus::Rejected],
+                true
+            ));
+
+        $status = match (true) {
+            $hasReturnedDocument => RegistrationStatus::DocumentsRejected,
+            $this->missingRequirements($registration)->isNotEmpty() => RegistrationStatus::DocumentsPending,
+            default => RegistrationStatus::DocumentsApproved,
+        };
+
+        if ($registration->status !== $status) {
+            $registration->forceFill(['status' => $status])->save();
+        }
     }
 
     /**

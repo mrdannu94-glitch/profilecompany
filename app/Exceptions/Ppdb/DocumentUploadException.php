@@ -26,4 +26,9 @@ class DocumentUploadException extends RuntimeException
     {
         return new self("Ukuran berkas {$name} melebihi batas {$maxKilobytes} KB.");
     }
+
+    public static function registrationClosed(): self
+    {
+        return new self('Pendaftaran ini sudah selesai atau kedaluwarsa sehingga tidak menerima unggahan baru.');
+    }
 }
